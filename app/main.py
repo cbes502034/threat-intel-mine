@@ -6,7 +6,11 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from app.config import STATIC_DIR
 from app.verification.format import SearchBody
-from app.services import post_search_service, post_ask_service
+from app.services import (
+    post_search_service,
+    post_ask_service,
+    post_agent_ask_service
+)
 app = FastAPI()
 
 
@@ -25,6 +29,8 @@ async def post_search(body: SearchBody): return await post_search_service(body)
 @app.post("/api/ask")
 async def post_ask(body: SearchBody): return await post_ask_service(body)
 
+@app.post("/api/agent_ask")
+async def post_agent_ask(body: SearchBody): return await post_agent_ask_service(body) 
 
 # 靜態頁面要放在所有 /api 路由之後
 # 否則 "/" 這個掛載點會先吃掉所有請求，/api/* 就打不到了

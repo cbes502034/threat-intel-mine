@@ -1,29 +1,15 @@
 """服務層：把「檢索 → 組提示詞 → 生成」串起來，路由（main.py）只負責呼叫這裡。
 
-流程：問題 ──embed_texts──▶ 問題向量 ──search──▶ 最相近的 top_k 塊 ──build_prompt──▶ Claude ──▶ 答案
+固定流程（/api/ask）：問題 ──retrieve──▶ 最相近的 top_k 塊 ──build_prompt──▶ Claude ──▶ 答案
+Agent（/api/agent_ask）：問題 ──run_agent──▶ Claude 自己決定怎麼查（見 app/agent/agent.py）──▶ 答案
 """
 from fastapi import HTTPException
 from app.utils import clean_question
-from app.crud import ChunkRepository
 from app.agent.LLM import Claude, Ollama
 from app.config import LLM_PROVIDER
-from app.agent.RAG.embeding import embed_texts
-from app.base import SessionLocal
+from app.agent.RAG.retrieve import retrieve
 from app.agent.RAG.prompt import build_prompt
-
-
-
-
-async def retrieve(question: str, top_k: int):
-    """檢索（search 和 ask 共用）：問題 → 向量 → 資料庫裡最相近的 top_k 塊，回傳 Chunks 物件清單。"""
-    try:
-        vecs = await embed_texts([question])               # 要傳清單，取第 [0] 個當問題向量
-    except Exception:
-        # Ollama 沒開或連不到：回 503（服務暫時無法使用），讓前端顯示明確訊息
-        raise HTTPException(status_code=503, detail="向量模型暫時無法使用，請確認 Ollama 已啟動")
-    # 每次請求開一個獨立的 session，離開 with 時自動關閉連線
-    async with SessionLocal() as session:
-        return await ChunkRepository(session).search(vecs[0], top_k)
+from app.agent.agent import run_agent
 
 
 async def post_search_service(body):
@@ -55,3 +41,16 @@ async def post_ask_service(body):
         # 注意：這裡列出「所有檢索到的塊」，不是只有答案實際引用的那幾塊
         "sources": [{"ref": i, "id": c.id, "title": c.content.split("\n", 1)[0]} for i, c in enumerate(chunks, 1)],
     }
+
+
+async def post_agent_ask_service(body):
+    """Agent 版問答：由 Claude 決定怎麼查知識庫；回傳格式和 /api/ask 相同，另外多了 searches。"""
+    question = clean_question(body)
+    try:
+        result = await run_agent(question, body.top_k)
+    except HTTPException:
+        raise                    # 檢索失敗的 503 原樣往外丟
+    except Exception:
+        # Claude API 失敗（金鑰、額度、網路）：回 502
+        raise HTTPException(status_code=502, detail="語言模型暫時無法使用，請稍後再試")
+    return {"question": question, **result}
