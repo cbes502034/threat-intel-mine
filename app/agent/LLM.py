@@ -9,6 +9,8 @@ import asyncio
 from anthropic import AsyncAnthropic
 
 
+start = time()
+
 # 回答規則：Claude 與 Ollama 共用同一份，改這裡兩邊都會生效
 SYSTEM_PROMPT = """
                 1.你是一個專業的 Cyber Threat Intelligence（CTI）分析助手，負責根據檢索資料回答使用者的資安問題。
