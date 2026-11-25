@@ -1,0 +1,40 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16          # 你的 pgvector image
+    container_name: thread-intel-mine_db    # 可省略，不寫 compose 會自動取名
+    environment:      # 三個 POSTGRES_ 變數，用「KEY: 值」的寫法
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "114321"
+      POSTGRES_DB: thread_intel_mine
+    ports:
+      - 5435:5432
+      # - "對外port:容器port"
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - pgdata_thread_intel:/var/lib/postgresql/data
+      # - 本機 init.sql 路徑:/docker-entrypoint-initdb.d/init.sql
+      # - volume名稱:/var/lib/postgresql/data
+  backend: 
+    build: .           # 填 . （用根目錄的 Dockerfile 建 image）
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app # - 本機專案資料夾:/app    ← 你之前掛載的來源:容器內路徑
+    environment:      # DB 連線資訊，給 config.py 讀
+      DB_HOST: ${DB_HOST}   # ← 服務名，不是 localhost
+      DB_PORT: ${DB_PORT} # ← 容器內部的 port，不是 5435
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      OLLAMA_URL: http://host.docker.internal:11434
+      OLLAMA_MODEL: qwen2.5:3b
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      ANTHROPIC_CLAUDE_MODEL: claude-haiku-5-5
+    depends_on:
+      - db
+    command: ["uvicorn", "app.main:app", "--port", "8000", "--host", "0.0.0.0", "--reload"]          # 如果要 --reload，要覆蓋 Dockerfile 的 CMD（選填）
+volumes: 
+  pgdata_thread_intel:
+  # 在這裡宣告上面用到的資料 volume 名稱（名稱後面冒號，值留空）
+
+  

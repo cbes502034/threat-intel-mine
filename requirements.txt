@@ -1,0 +1,14 @@
+fastapi==0.136.0
+uvicorn==0.45.0
+sqlalchemy==2.0.34
+pydantic==2.13.3
+httpx==0.28.1
+ollama==0.6.3
+anthropic==2.12.0
+claude_agent_sdk==0.2.187
+pandas==3.1.1
+numpy==2.5.5
+langchain_text_splitters==1.1.3
+psycopg==3.3.9
+pgvector==0.5.1
+asyncpg==0.32.0

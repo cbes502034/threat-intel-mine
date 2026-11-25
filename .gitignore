@@ -1,0 +1,13 @@
+# 金鑰與本機設定
+.env
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+
+# 原始下載檔（ATT&CK 原檔 55MB，可用 scripts/build_knowledge.py 重新下載）
+data/raw/
+
+# Office 暫存檔
+~$*
