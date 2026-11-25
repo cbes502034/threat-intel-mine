@@ -18,5 +18,9 @@ class ChunkRepository:
         """向量檢索：依餘弦距離（<=>）由近到遠排序，取前 top_k 筆。
         距離越小越相似；注意它永遠會回傳 top_k 筆，不管有沒有真的相關。
         """
-        query = await self.session.execute(select(Chunks).order_by(Chunks.vector.cosine_distance(query_vec)).limit(top_k))
+        query = await self.session.execute(
+            select(Chunks).order_by(
+                Chunks.vector.cosine_distance(query_vec)
+            ).limit(top_k)
+        )
         return query.scalars().all()   # scalars()：取每列的第一欄（Chunks 物件）；all()：轉成 list

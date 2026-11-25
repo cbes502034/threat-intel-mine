@@ -3,6 +3,7 @@
 流程：問題 ──embed_texts──▶ 問題向量 ──search──▶ 最相近的 top_k 塊 ──build_prompt──▶ Claude ──▶ 答案
 """
 from fastapi import HTTPException
+from fastapi.responses import StreamingResponse
 from app.utils import clean_question
 from app.crud import ChunkRepository
 from app.agent.LLM import Claude, Ollama
@@ -10,21 +11,21 @@ from app.config import LLM_PROVIDER
 from app.agent.RAG.embeding import embed_texts
 from app.base import SessionLocal
 from app.agent.RAG.prompt import build_prompt
+from app.agent.orchestrator import retrieve
+from app.agent.orchestrator import run_agent
+import asyncio
+import json
 
 
 
 
-async def retrieve(question: str, top_k: int):
-    """檢索（search 和 ask 共用）：問題 → 向量 → 資料庫裡最相近的 top_k 塊，回傳 Chunks 物件清單。"""
+async def post_agent_ask_service(body):
+    question = clean_question(body)
     try:
-        vecs = await embed_texts([question])               # 要傳清單，取第 [0] 個當問題向量
+        result = await run_agent(question, body.top_k, model=body.model, effort=body.effort)
     except Exception:
-        # Ollama 沒開或連不到：回 503（服務暫時無法使用），讓前端顯示明確訊息
-        raise HTTPException(status_code=503, detail="向量模型暫時無法使用，請確認 Ollama 已啟動")
-    # 每次請求開一個獨立的 session，離開 with 時自動關閉連線
-    async with SessionLocal() as session:
-        return await ChunkRepository(session).search(vecs[0], top_k)
-
+        raise HTTPException(status_code=502, detail="語言模型暫時無法使用，請稍後再試")
+    return {"question": question, **result}
 
 async def post_search_service(body):
     """知識檢索：只檢索，不呼叫 Claude，回傳最相近的 body.top_k 塊。"""
@@ -55,3 +56,35 @@ async def post_ask_service(body):
         # 注意：這裡列出「所有檢索到的塊」，不是只有答案實際引用的那幾塊
         "sources": [{"ref": i, "id": c.id, "title": c.content.split("\n", 1)[0]} for i, c in enumerate(chunks, 1)],
     }
+
+async def post_agent_stream_service(body):
+    question = clean_question(body)
+    queue = asyncio.Queue()
+
+    async def worker():
+        try:
+            result = await run_agent(question, body.top_k, emit=queue.put, model=body.model, effort=body.effort)
+            await queue.put({"type": "answer", "question": question, **result})
+        except HTTPException as e:
+            await queue.put({"type": "error", "status": e.status_code, "detail": e.detail})
+        except Exception:
+            await queue.put({"type": "error", "status": 502, "detail": "語言模型暫時無法使用，請稍後再試"})
+        finally:
+             await queue.put(None)
+    async def events():
+        task = asyncio.create_task(worker())
+        try:
+            yield f"data: {json.dumps({'type': 'start', 'question': question}, ensure_ascii=False)}\n\n"
+            while (event := await queue.get()) is not None:
+                yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+        finally:
+            task.cancel()
+
+    return StreamingResponse(
+        events(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-buffering": "no"
+        }
+    )

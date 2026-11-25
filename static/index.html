@@ -9,6 +9,7 @@
     :root {
       --bg: #0a0d10;
       --panel: #10151a;
+      --panel2: #0d1216;
       --line: #1f2a33;
       --line2: #2b3a46;
       --text: #f1f5f8;
@@ -16,11 +17,12 @@
       --dim: #5d6b77;
       --acc: #0ABAB5;
       --acc-h: #2BFFE0;
+      --acc-bg: #0c2a29;
       --high: #ff5d5d;
-      --med: #ffb020;
       --low: #3ddc97;
       --mono: ui-monospace, "Cascadia Code", Consolas, "Courier New", monospace;
       --sans: system-ui, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      --top: 56px;
     }
 
     * {
@@ -38,10 +40,10 @@
       color: var(--text);
       font: 15px/1.6 var(--sans);
       background-image:
-        linear-gradient(rgba(255, 255, 255, .025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, .025) 1px, transparent 1px);
+        linear-gradient(rgba(255, 255, 255, .022) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .022) 1px, transparent 1px);
       background-size: 32px 32px;
-      min-height: 100vh;
+      min-height: 100vh
     }
 
     button,
@@ -50,53 +52,100 @@
       color: inherit
     }
 
-    .wrap {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px
+    button {
+      cursor: pointer
     }
 
-    /* 頂欄 */
-    header {
-      border-bottom: 1px solid var(--line);
-      background: rgba(10, 13, 16, .92);
+    /* ---------- 頂部導覽列 ---------- */
+    .top {
       position: sticky;
       top: 0;
-      z-index: 5
-    }
-
-    header .wrap {
+      z-index: 20;
+      height: var(--top);
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      height: 52px
+      gap: 24px;
+      padding: 0 20px;
+      background: rgba(10, 13, 16, .95);
+      border-bottom: 1px solid var(--line)
     }
 
     .brand {
-      font-family: var(--mono);
-      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font: 700 15px var(--mono);
       letter-spacing: .08em;
-      font-size: 15px
+      white-space: nowrap
+    }
+
+    .brand .mark {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--acc);
+      position: relative
+    }
+
+    .brand .mark::after {
+      content: "";
+      position: absolute;
+      inset: 3px;
+      background: var(--acc)
     }
 
     .brand b {
       color: var(--acc)
     }
 
-    .status {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--sub);
+    .nav {
+      display: flex;
+      height: 100%
+    }
+
+    .nav span {
       display: flex;
       align-items: center;
-      gap: 8px
+      padding: 0 14px;
+      font-size: 14px;
+      color: var(--sub);
+      border-bottom: 2px solid transparent
+    }
+
+    .nav span.on {
+      color: var(--text);
+      border-bottom-color: var(--acc)
+    }
+
+    .top .grow {
+      flex: 1
+    }
+
+    .chip {
+      font: 12px var(--mono);
+      color: var(--sub);
+      border: 1px solid var(--line2);
+      padding: 3px 10px;
+      white-space: nowrap
+    }
+
+    .chip b {
+      color: var(--acc);
+      font-weight: 400
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font: 12px var(--mono);
+      color: var(--sub);
+      white-space: nowrap
     }
 
     .dot {
       width: 8px;
       height: 8px;
-      background: var(--dim);
-      display: inline-block
+      background: var(--dim)
     }
 
     .dot.ok {
@@ -107,165 +156,362 @@
       background: var(--high)
     }
 
-    /* 提問列 */
-    .query {
-      padding: 36px 0 24px
-    }
-
-    .query h1 {
-      font-size: 13px;
-      font-family: var(--mono);
-      color: var(--sub);
-      font-weight: 400;
-      margin: 0 0 10px;
-      letter-spacing: .1em
-    }
-
-    .qrow {
-      display: flex;
-      gap: 0;
-      border: 1px solid var(--line2);
-      background: var(--panel)
-    }
-
-    .qrow:focus-within {
-      border-color: var(--acc)
-    }
-
-    .qrow input {
-      flex: 1;
-      min-width: 0;
+    .menu {
+      display: none;
       background: transparent;
-      border: 0;
-      outline: 0;
-      padding: 16px 18px;
-      font: 18px var(--sans)
+      border: 1px solid var(--line2);
+      padding: 4px 10px;
+      font: 12px var(--mono);
+      color: var(--sub)
     }
 
-    .qrow input::placeholder {
+    .menu:hover {
+      color: var(--acc-h);
+      border-color: var(--acc-h)
+    }
+
+    /* ---------- 三欄版面 ---------- */
+    .shell {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr) 300px;
+      grid-template-areas: "side main rail";
+      min-height: calc(100vh - var(--top))
+    }
+
+    .side {
+      grid-area: side;
+      border-right: 1px solid var(--line);
+      background: var(--panel2);
+      position: sticky;
+      top: var(--top);
+      height: calc(100vh - var(--top));
+      overflow-y: auto;
+      padding: 16px 12px
+    }
+
+    .main {
+      grid-area: main;
+      display: flex;
+      flex-direction: column;
+      min-width: 0
+    }
+
+    .rail {
+      grid-area: rail;
+      border-left: 1px solid var(--line);
+      background: var(--panel2);
+      position: sticky;
+      top: var(--top);
+      height: calc(100vh - var(--top));
+      overflow-y: auto
+    }
+
+    /* ---------- 左側：提問紀錄 ---------- */
+    .newq {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--acc);
+      color: var(--acc);
+      padding: 9px 12px;
+      font: 700 13px var(--mono);
+      letter-spacing: .06em;
+      text-align: left
+    }
+
+    .newq:hover {
+      color: var(--acc-h);
+      border-color: var(--acc-h);
+      background: var(--acc-bg)
+    }
+
+    .sh {
+      margin: 20px 4px 8px;
+      font: 11px var(--mono);
+      letter-spacing: .14em;
       color: var(--dim)
     }
 
-    .btn {
-      background: var(--acc);
-      color: #04201f;
-      border: 0;
-      padding: 0 28px;
-      font-weight: 700;
-      cursor: pointer;
-      letter-spacing: .06em
-    }
-
-    .btn:hover:not(:disabled) {
-      background: var(--acc-h)
-    }
-
-    .btn:disabled {
-      background: var(--line2);
-      color: var(--dim);
-      cursor: not-allowed
-    }
-
-    .hint {
-      margin-top: 8px;
-      font-size: 13px;
-      color: var(--sub);
-      min-height: 20px
-    }
-
-    .hint.err {
-      color: var(--high)
-    }
-
-    /* 主版面 */
-    .grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 340px;
-      gap: 20px;
-      padding-bottom: 60px;
-      align-items: start
-    }
-
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--line)
-    }
-
-    .card>h2 {
+    .hist {
+      list-style: none;
       margin: 0;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--line);
-      font: 600 12px var(--mono);
-      letter-spacing: .12em;
+      padding: 0
+    }
+
+    .hist button {
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: 0;
+      border-left: 2px solid transparent;
+      padding: 8px 10px;
       color: var(--sub);
-      text-transform: uppercase
+      font-size: 14px;
+      line-height: 1.45
     }
 
-    .empty {
-      padding: 60px 16px;
-      text-align: center;
-      color: var(--dim);
-      font-family: var(--mono);
-      font-size: 13px
+    .hist button:hover {
+      color: var(--acc-h);
+      background: rgba(255, 255, 255, .02)
     }
 
-    .loading {
-      padding: 40px 16px
+    .hist button.on {
+      color: var(--text);
+      border-left-color: var(--acc);
+      background: var(--acc-bg)
     }
 
-    .loading .t {
-      font-family: var(--mono);
-      color: var(--sub);
-      font-size: 13px;
-      margin-bottom: 12px
-    }
-
-    .bar {
-      height: 4px;
-      background: var(--line);
-      position: relative;
+    .hist .hq {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
       overflow: hidden
     }
 
-    .bar::after {
-      content: "";
-      position: absolute;
-      inset: 0 auto 0 0;
-      width: 30%;
-      background: var(--acc);
-      animation: run 1.4s linear infinite
+    .hist .hm {
+      display: block;
+      margin-top: 2px;
+      font: 11px var(--mono);
+      color: var(--dim)
     }
 
-    @keyframes run {
-      from {
-        left: -30%
-      }
+    .side-empty {
+      padding: 4px;
+      font-size: 13px;
+      color: var(--dim)
+    }
 
-      to {
-        left: 100%
-      }
+    /* ---------- 主區 ---------- */
+    .body {
+      flex: 1;
+      padding: 28px 32px 24px;
+      max-width: 920px;
+      width: 100%;
+      margin: 0 auto
+    }
+
+    .hero {
+      padding: 8vh 0 24px
+    }
+
+    .hero .kicker {
+      font: 12px var(--mono);
+      letter-spacing: .16em;
+      color: var(--acc)
+    }
+
+    .hero h1 {
+      margin: 10px 0 10px;
+      font-size: 30px;
+      line-height: 1.3;
+      font-weight: 700
+    }
+
+    .hero p {
+      margin: 0 0 28px;
+      color: var(--sub);
+      max-width: 560px
+    }
+
+    .sug {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px
+    }
+
+    .sug button {
+      text-align: left;
+      background: var(--panel);
+      border: 1px solid var(--line2);
+      padding: 14px 16px;
+      font-size: 14px;
+      color: var(--text)
+    }
+
+    .sug button:hover {
+      border-color: var(--acc-h);
+      color: var(--acc-h)
+    }
+
+    .sug button span {
+      display: block;
+      margin-top: 4px;
+      font: 11px var(--mono);
+      color: var(--dim)
     }
 
     .q {
-      padding: 16px;
-      font-size: 19px;
-      font-weight: 600;
-      line-height: 1.5;
+      margin: 0 0 16px;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.45;
       word-break: break-word
+    }
+
+    .sect {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      margin-bottom: 16px
     }
 
     .kmeta {
       padding: 10px 16px;
-      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
       font: 12px var(--mono);
       letter-spacing: .1em;
       color: var(--dim)
     }
 
+    .empty {
+      padding: 40px 16px;
+      text-align: center;
+      color: var(--sub);
+      font-family: var(--mono);
+      font-size: 13px
+    }
+
+    .empty.err {
+      color: var(--high)
+    }
+
+    /* 處理過程 */
+    .proc>summary {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px 12px;
+      padding: 10px 16px;
+      cursor: pointer;
+      list-style: none;
+      font: 12px var(--mono);
+      letter-spacing: .1em;
+      color: var(--dim)
+    }
+
+    .proc>summary::-webkit-details-marker {
+      display: none
+    }
+
+    .proc>summary::before {
+      content: "▸";
+      color: var(--acc)
+    }
+
+    .proc[open]>summary::before {
+      content: "▾"
+    }
+
+    .proc>summary:hover {
+      color: var(--acc-h)
+    }
+
+    .proc .pt {
+      flex: 1;
+      white-space: nowrap
+    }
+
+    .ps {
+      letter-spacing: 0;
+      color: var(--sub)
+    }
+
+    .ps.ok {
+      color: var(--acc)
+    }
+
+    .ps.err {
+      color: var(--high)
+    }
+
+    .steps {
+      list-style: none;
+      margin: 0;
+      padding: 4px 16px 12px;
+      border-top: 1px solid var(--line)
+    }
+
+    .step {
+      display: flex;
+      gap: 10px;
+      padding: 6px 0;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--sub)
+    }
+
+    .step .ic {
+      flex: none;
+      width: 10px;
+      height: 10px;
+      margin-top: 7px;
+      border: 1px solid var(--dim)
+    }
+
+    .step.run .ic {
+      border-color: var(--acc);
+      background: var(--acc);
+      animation: blink 1s steps(2, start) infinite
+    }
+
+    .step.ok {
+      color: var(--text)
+    }
+
+    .step.ok .ic {
+      border-color: var(--acc)
+    }
+
+    .step.err {
+      color: var(--high)
+    }
+
+    .step.err .ic {
+      border-color: var(--high);
+      background: var(--high)
+    }
+
+    .step .sb {
+      flex: 1;
+      min-width: 0
+    }
+
+    .step code {
+      font: 13px var(--mono);
+      color: var(--acc);
+      word-break: break-all
+    }
+
+    .step .sm {
+      font: 12px var(--mono);
+      color: var(--dim)
+    }
+
+    .hits {
+      list-style: none;
+      margin: 6px 0 2px;
+      padding: 0;
+      border-left: 1px solid var(--line2)
+    }
+
+    .hits li {
+      padding: 2px 0 2px 10px;
+      font-size: 13px;
+      color: var(--sub);
+      word-break: break-word
+    }
+
+    .hits li.old {
+      color: var(--dim)
+    }
+
+    .hits .hr {
+      font: 12px var(--mono);
+      color: var(--acc);
+      margin-right: 6px
+    }
+
     /* 回答 */
     .ans {
-      padding: 16px;
-      border-top: 1px solid var(--line);
+      padding: 18px 20px;
       font-size: 16px;
       line-height: 1.85;
       word-break: break-word
@@ -273,6 +519,19 @@
 
     .ans p {
       margin: 0 0 10px
+    }
+
+    .ans h3 {
+      margin: 20px 0 8px;
+      padding-left: 10px;
+      border-left: 3px solid var(--acc);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text)
+    }
+
+    .ans h3:first-child {
+      margin-top: 0
     }
 
     .ans ul,
@@ -286,7 +545,6 @@
     }
 
     .ans strong {
-      color: var(--text);
       font-weight: 700
     }
 
@@ -305,7 +563,6 @@
       border: 1px solid var(--acc);
       padding: 0 6px;
       margin: 0 2px;
-      cursor: pointer;
       vertical-align: 1px
     }
 
@@ -314,7 +571,6 @@
       border-color: var(--acc-h)
     }
 
-    /* 逐字顯示：游標與來源區淡入 */
     .caret {
       display: inline-block;
       width: 8px;
@@ -331,162 +587,451 @@
       }
     }
 
-    .srcbox {
-      opacity: 0;
-      transition: opacity .4s
+    /* ---------- 底部提問列 ---------- */
+    .composer-wrap {
+      position: sticky;
+      bottom: 0;
+      padding: 12px 32px 16px;
+      background: linear-gradient(transparent, var(--bg) 30%)
     }
 
-    .srcbox.show {
-      opacity: 1
+    .composer {
+      max-width: 856px;
+      margin: 0 auto;
+      display: flex;
+      border: 1px solid var(--line2);
+      background: var(--panel)
+    }
+
+    .composer:focus-within {
+      border-color: var(--acc)
+    }
+
+    .composer input {
+      flex: 1;
+      min-width: 0;
+      background: transparent;
+      border: 0;
+      outline: 0;
+      padding: 15px 18px;
+      font-size: 16px
+    }
+
+    .composer input::placeholder {
+      color: var(--dim)
+    }
+
+    .btn {
+      background: var(--acc);
+      color: #04201f;
+      border: 0;
+      padding: 0 28px;
+      font-weight: 700;
+      letter-spacing: .06em
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--acc-h)
+    }
+
+    .btn:disabled {
+      background: var(--line2);
+      color: var(--dim);
+      cursor: not-allowed
+    }
+
+    /* 模型與強度選擇 */
+    .opts {
+      max-width: 856px;
+      margin: 0 auto 8px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 18px;
+      font: 12px var(--mono);
+      color: var(--dim)
+    }
+
+    .opts label {
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .opts select {
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--line2);
+      padding: 5px 8px;
+      font: 12px var(--mono);
+      cursor: pointer
+    }
+
+    .opts select:hover,
+    .opts select:focus {
+      border-color: var(--acc-h);
+      outline: 0
+    }
+
+    .opts .cost {
+      color: var(--dim)
+    }
+
+    .hint {
+      max-width: 856px;
+      margin: 6px auto 0;
+      min-height: 18px;
+      font-size: 12px;
+      color: var(--dim)
+    }
+
+    .hint.err {
+      color: var(--high)
+    }
+
+    /* ---------- 右側：引用來源與知識庫 ---------- */
+    .panel {
+      border-bottom: 1px solid var(--line)
+    }
+
+    .panel>h2 {
+      display: flex;
+      justify-content: space-between;
+      margin: 0;
+      padding: 14px 16px 10px;
+      font: 11px var(--mono);
+      letter-spacing: .14em;
+      color: var(--dim);
+      font-weight: 400
+    }
+
+    .panel>h2 b {
+      color: var(--acc);
+      font-weight: 400
+    }
+
+    .srcs {
+      list-style: none;
+      margin: 0;
+      padding: 0 12px 14px
+    }
+
+    .srcs .none {
+      padding: 4px 4px 6px;
+      font-size: 13px;
+      color: var(--dim)
+    }
+
+    .si {
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+      margin-bottom: 6px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      transition: background .3s, border-color .3s
+    }
+
+    .si.flash {
+      background: #12302f;
+      border-color: var(--acc-h)
+    }
+
+    .si .rank {
+      flex: none;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--acc);
+      font: 700 12px var(--mono);
+      color: var(--acc)
+    }
+
+    .si .ttl {
+      font-size: 13px;
+      line-height: 1.45;
+      word-break: break-word
+    }
+
+    .si .cid {
+      margin-top: 2px;
+      font: 11px var(--mono);
+      color: var(--dim)
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      margin: 0 16px 12px;
+      background: var(--line);
+      border: 1px solid var(--line)
+    }
+
+    .stats div {
+      background: var(--panel);
+      padding: 10px 8px;
+      text-align: center
+    }
+
+    .stats b {
+      display: block;
+      font: 700 18px var(--mono);
+      color: var(--text)
+    }
+
+    .stats span {
+      font: 11px var(--mono);
+      color: var(--dim)
+    }
+
+    .kb {
+      list-style: none;
+      margin: 0;
+      padding: 0 16px 8px
+    }
+
+    .kb li {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 0;
+      border-top: 1px solid var(--line);
+      font-size: 13px
+    }
+
+    .kb .nm {
+      color: var(--text)
+    }
+
+    .kb .ds {
+      display: block;
+      font-size: 12px;
+      color: var(--dim)
+    }
+
+    .kb .n {
+      font: 12px var(--mono);
+      color: var(--acc);
+      white-space: nowrap
+    }
+
+    .note {
+      padding: 4px 16px 16px;
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--dim)
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .srcbox {
-        transition: none
-      }
 
+      .step.run .ic,
       .caret {
         animation: none
       }
     }
 
-    /* 引用來源 */
-    .srcs {
-      list-style: none;
-      margin: 0;
-      padding: 0
+    /* ---------- RWD ---------- */
+    @media (max-width: 1180px) {
+      .shell {
+        grid-template-columns: 220px minmax(0, 1fr);
+        grid-template-areas: "side main" "side rail"
+      }
+
+      .rail {
+        position: static;
+        height: auto;
+        border-left: 0;
+        border-top: 1px solid var(--line);
+        display: grid;
+        grid-template-columns: 1fr 1fr
+      }
+
+      .panel {
+        border-bottom: 0
+      }
+
+      .panel+.panel {
+        border-left: 1px solid var(--line)
+      }
+
+      .composer-wrap {
+        position: static
+      }
     }
 
-    .si {
-      display: flex;
-      align-items: baseline;
-      gap: 12px;
-      padding: 10px 16px;
-      border-top: 1px solid var(--line);
-      transition: background .3s
-    }
+    @media (max-width: 860px) {
+      .top {
+        gap: 12px;
+        padding: 0 14px
+      }
 
-    .si.flash {
-      background: #12302f
-    }
+      .nav,
+      .chip {
+        display: none
+      }
 
-    .si .rank {
-      font: 800 18px var(--mono);
-      color: var(--acc);
-      flex: none
-    }
+      .menu {
+        display: block
+      }
 
-    .si .ttl {
-      font: 600 14px var(--mono);
-      flex: 1;
-      min-width: 0;
-      word-break: break-word
-    }
+      .shell {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas: "side" "main" "rail"
+      }
 
-    .si .cid {
-      font: 11px var(--mono);
-      color: var(--dim);
-      white-space: nowrap
-    }
+      .side {
+        display: none;
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line)
+      }
 
-    /* 知識來源 */
-    .kb {
-      list-style: none;
-      margin: 0;
-      padding: 0
-    }
+      .side.open {
+        display: block
+      }
 
-    .kb li {
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--line)
-    }
+      .body {
+        padding: 20px 16px 16px
+      }
 
-    .kb .nm {
-      font: 600 13px var(--mono);
-      color: var(--acc)
-    }
+      .hero {
+        padding: 4vh 0 16px
+      }
 
-    .kb .ds {
-      margin-top: 2px;
-      font-size: 14px;
-      color: var(--sub)
-    }
+      .hero h1 {
+        font-size: 24px
+      }
 
-    .note {
-      padding: 12px 16px;
-      font-size: 13px;
-      color: var(--dim)
-    }
-
-    @media(max-width:860px) {
-      .grid {
+      .sug {
         grid-template-columns: minmax(0, 1fr)
       }
 
-      .qrow {
-        flex-direction: column
-      }
-
-      .btn {
-        padding: 14px
-      }
-
-      .qrow input {
-        font-size: 16px
+      .q {
+        font-size: 19px
       }
 
       .ans {
+        padding: 14px 16px;
         font-size: 15px
       }
 
-      .q {
-        font-size: 17px
+      .composer-wrap {
+        padding: 8px 16px 14px
+      }
+
+      .composer input {
+        padding: 13px 14px
+      }
+
+      .btn {
+        padding: 0 18px
+      }
+
+      .rail {
+        grid-template-columns: minmax(0, 1fr)
+      }
+
+      .panel+.panel {
+        border-left: 0;
+        border-top: 1px solid var(--line)
       }
     }
   </style>
 </head>
 
 <body>
-  <header>
-    <div class="wrap">
-      <div class="brand">THREAT<b>/</b>INTEL</div>
-      <div class="status"><span class="dot" id="dot"></span><span id="stxt">連線中</span></div>
-    </div>
+  <header class="top">
+    <div class="brand"><span class="mark" aria-hidden="true"></span>THREAT<b>/</b>INTEL</div>
+    <nav class="nav" aria-label="主要功能"><span class="on">資安問答</span></nav>
+    <div class="grow"></div>
+    <div class="chip" id="mode">模式 <b>Agent</b></div>
+    <div class="status"><span class="dot" id="dot"></span><span id="stxt">連線中</span></div>
+    <button class="menu" id="menu" type="button" aria-expanded="false" aria-controls="side">紀錄</button>
   </header>
 
-  <main class="wrap">
-    <section class="query">
-      <h1>SECURITY KNOWLEDGE · 資安知識問答</h1>
-      <form class="qrow" id="form" autocomplete="off">
-        <input id="question" placeholder="問一個資安問題，例如：怎麼防止子網域接管？" maxlength="500" autofocus>
-        <button class="btn" id="go" type="submit">提問</button>
-      </form>
-      <div class="hint" id="hint"></div>
-    </section>
+  <div class="shell">
+    <aside class="side" id="side" aria-label="提問紀錄">
+      <button class="newq" id="newq" type="button">＋ 新提問</button>
+      <div class="sh">提問紀錄</div>
+      <ol class="hist" id="hist"></ol>
+      <div class="side-empty" id="histEmpty">還沒有提問</div>
+    </aside>
 
-    <div class="grid">
-      <section class="card">
-        <h2>回答</h2>
-        <div id="body">
-          <div class="empty">輸入問題開始提問</div>
+    <main class="main">
+      <div class="body" id="body"></div>
+      <div class="composer-wrap">
+        <div class="opts">
+          <label>模型
+            <select id="model" aria-label="模型">
+              <option value="claude-haiku-5-5">Claude Haiku 5.5 · 快速</option>
+              <option value="claude-sonnet-5-5">Claude Sonnet 5.5 · 平衡</option>
+              <option value="claude-opus-5-5">Claude Opus 5.5 · 最強</option>
+            </select>
+          </label>
+          <label>強度
+            <select id="effort" aria-label="思考強度">
+              <option value="low">低 · 最快</option>
+              <option value="medium">中</option>
+              <option value="high">高 · 最仔細</option>
+            </select>
+          </label>
+          <span class="cost" id="cost"></span>
         </div>
-      </section>
+        <form class="composer" id="form" autocomplete="off">
+          <input id="question" placeholder="問一個資安問題" maxlength="500" autofocus>
+          <button class="btn" id="go" type="submit">提問</button>
+        </form>
+        <div class="hint" id="hint"></div>
+      </div>
+    </main>
 
-      <aside class="card">
-        <h2>知識來源</h2>
+    <aside class="rail" aria-label="引用來源與知識庫">
+      <section class="panel">
+        <h2>引用來源 <b id="srcCount"></b></h2>
+        <ol class="srcs" id="srcs">
+          <li class="none">提問後，這裡會列出答案引用的資料</li>
+        </ol>
+      </section>
+      <section class="panel">
+        <h2>知識庫</h2>
+        <div class="stats">
+          <div><b>537</b><span>資料塊</span></div>
+          <div><b>198</b><span>文件</span></div>
+          <div><b>4</b><span>來源</span></div>
+        </div>
         <ul class="kb">
-          <li><div class="nm">MITRE ATT&amp;CK</div><div class="ds">攻擊手法（偵察、資源開發、初始入侵、C2）與緩解措施</div></li>
-          <li><div class="nm">OWASP Cheat Sheet</div><div class="ds">子網域接管防護</div></li>
-          <li><div class="nm">Cloudflare Docs</div><div class="ds">DNS 與代理的運作、來源伺服器保護</div></li>
+          <li><div><span class="nm">MITRE ATT&amp;CK 攻擊技術</span><span class="ds">偵察、資源開發、初始入侵、C2</span></div><span class="n">163 份</span></li>
+          <li><div><span class="nm">MITRE ATT&amp;CK 緩解措施</span><span class="ds">對應攻擊技術的防護做法</span></div><span class="n">30 份</span></li>
+          <li><div><span class="nm">Cloudflare Docs</span><span class="ds">DNS、代理、來源伺服器保護</span></div><span class="n">4 份</span></li>
+          <li><div><span class="nm">OWASP Cheat Sheet</span><span class="ds">子網域接管防護</span></div><span class="n">1 份</span></li>
         </ul>
-        <div class="note">回答只根據檢索到的資料；資料中沒有的內容會明說。</div>
-      </aside>
-    </div>
-  </main>
+        <div class="note">由 Claude 自行決定要不要查詢、用什麼關鍵字查；回答只根據查到的資料，資料中沒有的內容會明說。</div>
+      </section>
+    </aside>
+  </div>
 
   <script>
     const API = "/api";
-    let busy = false;
+    const HIST_KEY = "threat-intel-history-v1";
+    const SUGGESTIONS = [
+      ["釣魚攻擊和子網域接管各要怎麼防？", "跨主題，會拆成多次查詢"],
+      ["子網域接管要怎麼防？", "OWASP 防護清單"],
+      ["什麼是多因素驗證？", "MITRE 緩解措施 M1032"],
+      ["駭客常用的攻擊手法有哪些？", "ATT&CK 攻擊技術"],
+    ];
+    const PREF_KEY = "threat-intel-prefs-v1";
+    // 模型的簡稱與相對費用（以輸入價格比較：Haiku $0.10、Sonnet $2、Opus $4 / 每百萬 token）
+    const MODELS = {
+      "claude-haiku-5-5": { short: "Haiku 5.5", cost: "相對費用 1×" },
+      "claude-sonnet-5-5": { short: "Sonnet 5.5", cost: "相對費用約 20×" },
+      "claude-opus-5-5": { short: "Opus 5.5", cost: "相對費用約 40×" },
+    };
+    const EFFORTS = { low: "低", medium: "中", high: "高" };
+    let busy = false, typer = null, history = [], activeId = null;
 
     const $ = id => document.getElementById(id);
     const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -495,14 +1040,42 @@
     async function api(path, opt) {
       let r;
       try { r = await fetch(API + path, opt); }
-      catch { throw new Error("連不到後端，請確認伺服器已啟動，並從 http://localhost:8000 開啟本頁"); }
+      catch { throw new Error("連不到後端，請確認伺服器已啟動"); }
       if (!r.ok) { const d = (await r.json().catch(() => ({}))).detail; throw new Error(typeof d === "string" ? d : ("HTTP " + r.status)); }
       return r.json();
     }
 
-    /* ---------- 回答 ---------- */
-    /* 把 Claude 回的簡易 Markdown（粗體、行內程式碼、清單）轉成畫面；先跳脫再轉換，所以不會執行回傳內容裡的 HTML。
-       答案裡的 [1] 這種編號，只有在 sources 真的有這個 ref 時才變成可點的標籤。 */
+    /* 讀 /api/agent_stream 的 SSE：每收到一行 data: {...} 就交給 onEvent。
+       後端沒有這條路由時（404／405）回傳 false，由呼叫端改用固定流程。 */
+    async function askStream(payload, onEvent) {
+      let r;
+      try {
+        r = await fetch(API + "/agent_stream", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      } catch { throw new Error("連不到後端，請確認伺服器已啟動"); }
+      if (r.status === 404 || r.status === 405) return false;
+      if (!r.ok) { const d = (await r.json().catch(() => ({}))).detail; throw new Error(typeof d === "string" ? d : ("HTTP " + r.status)); }
+      const reader = r.body.getReader(), dec = new TextDecoder();
+      let buf = "";
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        let cut;
+        while ((cut = buf.indexOf("\n\n")) >= 0) {
+          const block = buf.slice(0, cut); buf = buf.slice(cut + 2);
+          for (const line of block.split("\n")) {
+            if (!line.startsWith("data:")) continue;
+            let ev; try { ev = JSON.parse(line.slice(5)); } catch { continue; }
+            onEvent(ev);
+          }
+        }
+      }
+      return true;
+    }
+
+    /* ---------- 答案渲染 ---------- */
+    /* 簡易 Markdown（標題、粗體、行內程式碼、清單）；先跳脫再轉換，不會執行回傳內容裡的 HTML。
+       [1] 這種編號，只有在來源真的有這個 ref 時才變成可點的標籤。 */
     function renderAnswer(text, refs) {
       const inline = s => s
         .replace(/`([^`]+)`/g, "<code>$1</code>")
@@ -515,32 +1088,30 @@
         if (!line) { close(); continue; }
         if ((m = line.match(/^[-*]\s+(.*)/))) { if (list !== "ul") { close(); out += "<ul>"; list = "ul"; } out += `<li>${inline(m[1])}</li>`; }
         else if ((m = line.match(/^\d+[.)]\s+(.*)/))) { if (list !== "ol") { close(); out += "<ol>"; list = "ol"; } out += `<li>${inline(m[1])}</li>`; }
+        else if ((m = line.match(/^#{1,4}\s+(.*)/))) { close(); out += `<h3>${inline(m[1])}</h3>`; }
         else { close(); out += `<p>${inline(line)}</p>`; }
       }
       close(); return out;
     }
-    /* 逐字顯示（純前端效果，答案其實已經完整收到）：
-       先把完整答案渲染好，再把每個文字節點清空、依序補回去，所以粗體、清單、程式碼不會在打字中途閃爍。
-       [1] 這種引用標籤整個一次出現；點答案區、或使用者減少動態效果時，會直接顯示全文。 */
-    let typer = null;
-    function typeIn(el, onDone) {
+
+    /* 逐字顯示：先渲染完整答案，再把文字節點清空、依序補回；點答案區可直接顯示全文 */
+    function typeIn(el) {
       const items = [], w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
       for (let n; (n = w.nextNode());) {
         if (!n.data) continue;
         items.push({ n, full: n.data, pos: 0, atomic: !!n.parentElement.closest(".cite") });
       }
       const total = items.reduce((s, o) => s + (o.atomic ? 1 : o.full.length), 0);
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (!total || reduced) { onDone(); return null; }
+      if (!total || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return null;
       items.forEach(o => { o.n.data = ""; });
       const caret = document.createElement("span"); caret.className = "caret";
-      const ms = Math.min(3500, Math.max(600, total * 12));          // 全文約 0.6~3.5 秒打完，長答案不會拖太久
-      const step = Math.max(1, Math.ceil(total / (ms / 25)));        // 每 25ms 補回 step 個字
+      const ms = Math.min(3500, Math.max(600, total * 12));
+      const step = Math.max(1, Math.ceil(total / (ms / 25)));
       let i = 0, timer = null;
       const finish = () => {
         clearInterval(timer); el.removeEventListener("click", finish);
         items.forEach(o => { o.n.data = o.full; });
-        caret.remove(); typer = null; onDone();
+        caret.remove(); typer = null;
       };
       timer = setInterval(() => {
         let budget = step;
@@ -555,43 +1126,211 @@
         const cur = items[i].n; (cur.parentElement.closest(".cite") || cur).after(caret);
       }, 25);
       el.addEventListener("click", finish);
-      return { cancel() { clearInterval(timer); el.removeEventListener("click", finish); typer = null; } };
+      return { cancel: finish };
     }
-    function showAnswer(res) {
-      const src = res.sources || [];
-      $("body").innerHTML = `<div class="q">${esc(res.question)}</div>` +
-        `<div class="kmeta">回答</div><div class="ans">${renderAnswer(res.answer || "", new Set(src.map(s => s.ref)))}</div>` +
-        (src.length ? `<div class="srcbox" id="srcbox"><div class="kmeta">引用來源 · ${src.length} 塊檢索資料</div><ol class="srcs">` + src.map(s =>
-          `<li class="si" id="src-${esc(s.ref)}"><span class="rank">${esc(s.ref)}</span><span class="ttl">${esc(s.title)}</span><span class="cid">#${esc(s.id)}</span></li>`).join("") + `</ol></div>` : "");
-      typer = typeIn($("body").querySelector(".ans"), () => { const b = $("srcbox"); if (b) b.classList.add("show"); });
+
+    function answerHTML(res) {
+      const refs = new Set((res.sources || []).map(s => s.ref));
+      return `<section class="sect"><div class="kmeta">回答</div><div class="ans">${renderAnswer(res.answer || "", refs)}</div></section>`;
     }
+
+    function renderSources(src) {
+      src = src || [];
+      $("srcCount").textContent = src.length ? src.length + " 塊" : "";
+      $("srcs").innerHTML = src.length
+        ? src.map(s => `<li class="si" id="src-${esc(s.ref)}"><span class="rank">${esc(s.ref)}</span><div><div class="ttl">${esc(s.title)}</div><div class="cid">chunk #${esc(s.id)}</div></div></li>`).join("")
+        : `<li class="none">這個回答沒有引用資料</li>`;
+    }
+
+    /* ---------- 處理過程 ---------- */
+    function procHTML(open) {
+      return `<details class="sect proc" id="proc"${open ? " open" : ""}><summary><span class="pt">處理過程</span><span class="ps" id="pstat">進行中 · 0.0 秒</span></summary><ol class="steps" id="steps"></ol></details>`;
+    }
+    function addStep(html, state = "run") {
+      const li = document.createElement("li");
+      li.className = "step " + state;
+      li.innerHTML = `<span class="ic" aria-hidden="true"></span><div class="sb"><div class="st">${html}</div></div>`;
+      $("steps").appendChild(li);
+      return li;
+    }
+    function setStep(li, state, html) {
+      if (!li) return;
+      li.className = "step " + state;
+      if (html != null) li.querySelector(".st").innerHTML = html;
+    }
+
+    /* ---------- 首頁（空狀態） ---------- */
+    function showHome() {
+      if (typer) typer.cancel();
+      activeId = null; renderHistory();
+      $("body").innerHTML = `<div class="hero"><div class="kicker">SECURITY KNOWLEDGE ASSISTANT</div>` +
+        `<h1>用自然語言查詢資安知識，<br>每個答案都附上出處。</h1>` +
+        `<p>資料來自 MITRE ATT&amp;CK、OWASP 與 Cloudflare 的公開文件。系統會自己決定要不要查詢、用什麼關鍵字查，過程即時顯示。</p>` +
+        `<div class="sug">` + SUGGESTIONS.map(([q, d]) => `<button type="button" data-q="${esc(q)}">${esc(q)}<span>${esc(d)}</span></button>`).join("") + `</div></div>`;
+      renderSources([]);
+      $("srcs").innerHTML = `<li class="none">提問後，這裡會列出答案引用的資料</li>`;
+      $("question").value = ""; $("question").focus();
+    }
+
+    /* ---------- 提問紀錄（只存在這台瀏覽器） ---------- */
+    function loadHistory() {
+      try { history = JSON.parse(localStorage.getItem(HIST_KEY) || "[]"); if (!Array.isArray(history)) history = []; }
+      catch { history = []; }
+    }
+    function saveHistory() {
+      try { localStorage.setItem(HIST_KEY, JSON.stringify(history.slice(0, 20))); } catch { }
+    }
+    function renderHistory() {
+      $("histEmpty").style.display = history.length ? "none" : "block";
+      $("hist").innerHTML = history.map(h =>
+        `<li><button type="button" data-id="${esc(h.id)}" class="${h.id === activeId ? "on" : ""}"><span class="hq">${esc(h.q)}</span><span class="hm">${esc(h.meta)}</span></button></li>`).join("");
+    }
+    function openHistory(id) {
+      const h = history.find(x => x.id === id); if (!h) return;
+      if (typer) typer.cancel();
+      activeId = id; renderHistory();
+      $("body").innerHTML = `<h2 class="q">${esc(h.q)}</h2>` + procHTML(false) + `<div id="ansbox"></div>`;
+      $("steps").innerHTML = h.steps;
+      const s = $("pstat"); s.textContent = h.label; s.className = "ps " + (h.ok ? "ok" : "err");
+      $("ansbox").innerHTML = h.ok ? answerHTML(h.res) : `<div class="sect empty err">${esc(h.res.answer)}</div>`;
+      renderSources(h.ok ? h.res.sources : []);
+      closeSide();
+    }
+
+    /* ---------- 送出問題 ---------- */
+    async function ask(q) {
+      if (busy) return;
+      if (!q) return setHint("請輸入問題", true);
+      if (typer) typer.cancel();
+      // 這次提問用的模型與強度；後端 SearchBody 會再檢查是否在允許清單內
+      const payload = { question: q, model: $("model").value, effort: $("effort").value };
+      const optLabel = `${MODELS[payload.model].short} · 強度${EFFORTS[payload.effort]}`;
+      setHint(""); busy = true; setBusyUI(true); activeId = null; renderHistory(); closeSide();
+      $("body").innerHTML = `<h2 class="q">${esc(q)}</h2>` + procHTML(true) + `<div id="ansbox"></div>`;
+      $("srcCount").textContent = ""; $("srcs").innerHTML = `<li class="none">等待回答…</li>`;
+
+      const t0 = Date.now();
+      const secs = () => ((Date.now() - t0) / 1000).toFixed(1);
+      let cur = addStep("判斷問題，決定是否查詢知識庫");
+      let nSearch = 0, finished = false;
+      const timer = setInterval(() => { const s = $("pstat"); if (s && !finished) s.textContent = `進行中 · ${secs()} 秒`; }, 100);
+      const finish = (label, ok) => {
+        finished = true;
+        const s = $("pstat"); if (s) { s.textContent = label; s.className = "ps " + (ok ? "ok" : "err"); }
+      };
+      const record = (res, label, ok) => {
+        const id = String(Date.now());
+        history.unshift({ id, q, res, label, ok, steps: $("steps").innerHTML, meta: `${optLabel} · ` + (ok ? `查詢 ${nSearch} 次` : "失敗") + " · " + secs() + " 秒" });
+        history = history.slice(0, 20); saveHistory(); activeId = id; renderHistory();
+      };
+      const fail = msg => {
+        setStep(cur, "err", esc(msg));
+        const label = "失敗 · " + secs() + " 秒";
+        finish(label, false);
+        $("ansbox").innerHTML = `<div class="sect empty err">生成失敗：${esc(msg)}</div>`;
+        $("srcs").innerHTML = `<li class="none">沒有可顯示的來源</li>`;
+        record({ answer: "生成失敗：" + msg, sources: [] }, label, false);
+      };
+      const done = (res, label) => {
+        label = label || `完成 · 查詢 ${nSearch} 次 · ${secs()} 秒`;
+        finish(label, true);
+        $("proc").open = false;
+        renderSources(res.sources);
+        $("ansbox").innerHTML = answerHTML(res);
+        record({ answer: res.answer, sources: res.sources || [] }, label, true);
+        typer = typeIn($("body").querySelector(".ans"));
+      };
+
+      try {
+        const streamed = await askStream(payload, ev => {
+          if (ev.type === "search") {
+            nSearch++;
+            setStep(cur, "ok", nSearch === 1 ? "判斷為資安問題，決定查詢知識庫" : "資料還不夠，換關鍵字再查一次");
+            cur = addStep(`查詢 ${nSearch}：<code>${esc(ev.query)}</code>`);
+          } else if (ev.type === "found") {
+            const results = ev.results || [], fresh = results.filter(x => x.new).length;
+            setStep(cur, "ok", `查詢 ${nSearch}：<code>${esc(ev.query)}</code>　<span class="sm">找到 ${results.length} 塊，新增 ${fresh} 塊</span>`);
+            cur.querySelector(".sb").insertAdjacentHTML("beforeend", `<ul class="hits">` + results.map(x =>
+              `<li class="${x.new ? "" : "old"}"><span class="hr">[${esc(x.ref)}]</span>${esc(x.title)}${x.new ? "" : ' <span class="sm">（先前已查到）</span>'}</li>`).join("") + `</ul>`);
+            cur = addStep("分析查詢結果，判斷資料是否足夠");
+          } else if (ev.type === "search_error") {
+            setStep(cur, "err", `查詢 ${nSearch}：<code>${esc(ev.query)}</code>　<span class="sm">查詢失敗</span>`);
+            cur = addStep("分析查詢結果，判斷資料是否足夠");
+          } else if (ev.type === "answer") {
+            setStep(cur, "ok", nSearch ? "資料足夠，撰寫回答" : "判斷與資安無關，不需查詢");
+            cur = addStep(`完成回答 · 引用來源 ${(ev.sources || []).length} 塊`, "ok");
+            done(ev);
+          } else if (ev.type === "error") {
+            fail(ev.detail || "發生錯誤");
+          }
+        });
+        setMode((streamed ? "Agent" : "固定流程") + " · " + optLabel);
+        if (!streamed) {
+          // 後端沒有 /api/agent_stream：改用固定流程，畫面照樣可用
+          setStep(cur, "ok", "即時過程尚未啟用，改用固定流程");
+          cur = addStep("檢索一次並生成回答");
+          const res = await api("/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+          setStep(cur, "ok", `檢索一次並生成回答 · 引用來源 ${(res.sources || []).length} 塊`);
+          done(res, `完成（固定流程）· ${secs()} 秒`);
+        } else if (!finished) {
+          fail("連線中斷，沒有收到回答");
+        }
+      } catch (e) {
+        fail(e.message);
+      } finally {
+        clearInterval(timer); busy = false; setBusyUI(false);
+        $("question").value = "";
+      }
+    }
+
     function setHint(msg, err) { const h = $("hint"); h.textContent = msg || ""; h.className = "hint" + (err ? " err" : ""); }
+    function setMode(m) { $("mode").innerHTML = `模式 <b>${esc(m)}</b>`; }
+    function setBusyUI(on) { $("go").disabled = on; $("model").disabled = on; $("effort").disabled = on; }
+
+    /* 模型與強度：顯示相對費用，並記住這台瀏覽器上次的選擇 */
+    function showCost() { $("cost").textContent = MODELS[$("model").value].cost; }
+    function loadPrefs() {
+      try {
+        const p = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
+        if (MODELS[p.model]) $("model").value = p.model;
+        if (EFFORTS[p.effort]) $("effort").value = p.effort;
+      } catch { }
+      showCost();
+    }
+    function savePrefs() {
+      try { localStorage.setItem(PREF_KEY, JSON.stringify({ model: $("model").value, effort: $("effort").value })); } catch { }
+      showCost();
+    }
+    function closeSide() { $("side").classList.remove("open"); $("menu").setAttribute("aria-expanded", "false"); }
 
     /* ---------- 事件 ---------- */
-    $("form").addEventListener("submit", async ev => {
-      ev.preventDefault();
-      if (busy) return;
-      const q = $("question").value.trim();
-      if (!q) return setHint("請輸入問題", true);
-      if (typer) typer.cancel();                       // 上一題還在逐字顯示時，直接中止
-      setHint(""); busy = true; $("go").disabled = true;
-      const t0 = Date.now();
-      $("body").innerHTML = `<div class="loading"><div class="t" id="lt">生成中… 0 秒</div><div class="bar"></div></div>`;
-      const timer = setInterval(() => { const e = $("lt"); if (e) e.textContent = `生成中… ${Math.floor((Date.now() - t0) / 1000)} 秒`; }, 500);
-      try {
-        showAnswer(await api("/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: q }) }));
-      } catch (e) {
-        $("body").innerHTML = `<div class="empty">生成失敗：${esc(e.message)}</div>`;
-      } finally { clearInterval(timer); busy = false; $("go").disabled = false; }
+    $("form").addEventListener("submit", ev => { ev.preventDefault(); ask($("question").value.trim()); });
+    $("newq").addEventListener("click", () => { if (busy) return setHint("回答產生中，請稍候"); showHome(); closeSide(); });
+    $("hist").addEventListener("click", ev => {
+      const b = ev.target.closest("button[data-id]"); if (!b) return;
+      if (busy) return setHint("回答產生中，請稍候");
+      openHistory(b.dataset.id);
+    });
+    $("menu").addEventListener("click", () => {
+      const open = $("side").classList.toggle("open");
+      $("menu").setAttribute("aria-expanded", String(open));
     });
     $("body").addEventListener("click", ev => {
+      const s = ev.target.closest(".sug button[data-q]");
+      if (s) { $("question").value = s.dataset.q; ask(s.dataset.q); return; }
       const c = ev.target.closest(".cite"); if (!c) return;
       const li = $("src-" + c.dataset.ref); if (!li) return;
       li.scrollIntoView({ behavior: "smooth", block: "nearest" });
       li.classList.add("flash"); setTimeout(() => li.classList.remove("flash"), 1200);
     });
 
-    /* ---------- 啟動：探測後端 ---------- */
+    $("model").addEventListener("change", savePrefs);
+    $("effort").addEventListener("change", savePrefs);
+
+    /* ---------- 啟動 ---------- */
+    loadPrefs();
+    loadHistory();
+    showHome();
     (async function () {
       try {
         const r = await fetch(API + "/health", { cache: "no-store" });
