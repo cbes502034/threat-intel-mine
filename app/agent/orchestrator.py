@@ -1,5 +1,3 @@
-# async def search_knowledge_base(query: str) -> str:
-#     nonlocal embed_failed
 from app.agent.RAG.embeding import embed_texts
 from fastapi.exceptions import HTTPException
 from app.base import SessionLocal
